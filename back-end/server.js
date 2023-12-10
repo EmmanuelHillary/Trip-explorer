@@ -517,14 +517,28 @@ app.get('/api/continents', (req, res) => {
 });
 
 app.get("/api/continents/:id", (req, res) => {
+  const { name } = req.query;
+  let data;
   const continent = continents.find((t) => t.id === parseInt(req.params.id));
   if (!continent) res.status(404).send("Continent not found");
   const continent_trips = trips.filter(trip => trip.continent_id === continent.id) 
-  const data = {
+  data = {
     continent,
     trips: continent_trips
   }
+  if (!name) {
+    res.json(data);
+  }
+  const regex = new RegExp(name, 'i');
+  const searchResults = continent_trips.filter(trip =>
+    regex.test(trip.name) || regex.test(trip.country)
+  );
+  data = {
+    continent,
+    trips: searchResults
+  }
   res.json(data);
+  
 });
 
 app.get("/api/continents/:countryid/trips/:tripid", (req, res) => {
